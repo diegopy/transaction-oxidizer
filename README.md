@@ -15,6 +15,12 @@ CSV transaction engine
 ## Architecture and design
 As indicated in the requirements document special care was taken to ensure completeness, correctness, safety and robustness, efficiency and maintainability. The program was structured as a lib crate that handles transaction processing, accounts keeping, io and fixed point handling (explained below) with the main binary crate providing just the "user interface" CLI and argument parsing.
 
+## Business logic assumptions
+The following assumptions were made on aspects that the specification wasn't clear or failed to mention:
+- The description of dispute only makes sense for deposit transactions (decrease available by transaction amount, increase held by transaction amount). It is assumed then that only deposit transactions can be disputed. It's ignored for withdrawals.
+- The spec is silent on what a locked client account means. It's assumed that once an account is locked no more transactions of any type can be executed on the account.
+- As specified on the "Assumptions" section of the spec, all transactions on missing clients create a new client record.
+
 ## Completeness and correctness
 The code was tested by various unit tests and by an integration test using sample input and output files located under /tests/data. `cargo test` will run the test harness. It discovers the sample files by looking for input_{n}.csv and output_{n}.csv starting from n = 1. For each pair of files, it processes the transactions on the input file and compares the generated output against the corresponding output file. If any difference is found the test fails.
 The sample files exercise all transaction types and their effects: deposit, withdrawal, dispute, resolve and charge-back. It also tests the correct handling of large monetary amounts.
